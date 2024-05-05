@@ -1,4 +1,3 @@
-
 import { useEffect, useState} from 'react';
 import Tesseract from 'tesseract.js';
 import './App.css';
@@ -15,7 +14,7 @@ function Ocr() {
   const handleChange = (event) => {
     document.getElementById('text-box').style.display = 'none';
     setText('');
-    setImagePath(URL.createObjectURL(event.target.files[0]));
+    if(event.target.files[0]) setImagePath(URL.createObjectURL(event.target.files[0]));
   }
  
   const handleClick = () => {
@@ -38,19 +37,23 @@ function Ocr() {
     for (let entry of entries) {
         const lines = entry.split('\n');
         const entryKeyValuePairs = {};
-
         for (let line of lines) {
             const [key, value] = line.split(':').map(str => str.trim());
             if (key && value) {
               headers.push({'label':key,'key':key});
-                entryKeyValuePairs[key] = value;
+              entryKeyValuePairs[key] = value;
+            }else if(!key || (!key && !value)){
+              continue;
+            }else if(!value){
+              headers.push({'label':'No Key','key':'NoKey'});
+              entryKeyValuePairs['NoKey'] = key;
             }
         }
-
         if (Object.keys(entryKeyValuePairs).length > 0) {
             keyValuePairs.push(entryKeyValuePairs);
         }
     }
+    
       setText(keyValuePairs);
       setHeaders(headers);
   })
@@ -61,7 +64,7 @@ function Ocr() {
           <div className='d-flex pt-5 w-50 h-50'>
         { imagePath ?
            <img 
-           src={imagePath} className="h-100 w-100 img-fluid rounded m-auto py-3 d-block"/>
+           src={imagePath} alt="Sorry Not Loaded" className="h-100 w-100 img-fluid rounded m-auto py-3 d-block"/>
            :
            ''
         }
